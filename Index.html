@@ -1,0 +1,105 @@
+<!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Store</title>
+<style>
+body { margin:0; font-family:sans-serif; background:#0b0b0b; color:#fff; }
+header { padding:15px; text-align:center; background:#000; font-size:24px; }
+nav { display:flex; justify-content:space-between; padding:10px; background:#1a1a1a; }
+input, select { padding:8px; width:100%; margin:5px 0; }
+.container { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:15px; padding:15px; }
+.card { background:#1c1c1c; padding:10px; border-radius:10px; }
+.card img { width:100%; border-radius:10px; }
+button { padding:10px; width:100%; margin-top:5px; background:gold; border:none; cursor:pointer; }
+.adminPanel { display:none; padding:15px; background:#111; }
+</style>
+</head>
+<body><header>My Ultimate Brand</header><nav>
+<input type="text" id="search" placeholder="Search..." onkeyup="searchProduct()">
+<button onclick="showAdmin()">Admin</button>
+</nav><div class="adminPanel" id="adminPanel">
+<h3>Add Product</h3>
+<input id="name" placeholder="Name">
+<input id="price" placeholder="Price">
+<input id="img" placeholder="Image URL">
+<input id="category" placeholder="Category">
+<button onclick="addProduct()">Add Product</button><h3>Orders</h3>
+<div id="orders"></div>
+</div><div class="container" id="products"></div><script>
+let products = JSON.parse(localStorage.getItem('products')) || [];
+let orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+function render(list = products){
+ let container = document.getElementById('products');
+ container.innerHTML = '';
+ list.forEach((p,i)=>{
+ container.innerHTML += `
+ <div class="card">
+ <img src="${p.img}">
+ <h3>${p.name}</h3>
+ <p>${p.price}</p>
+ <small>${p.category}</small>
+ <button onclick="order('${p.name}','${p.price}')">Order WhatsApp</button>
+ <button onclick="deleteProduct(${i})">Delete</button>
+ </div>`;
+ });
+}
+
+function addProduct(){
+ let p = {
+ name: document.getElementById('name').value,
+ price: document.getElementById('price').value,
+ img: document.getElementById('img').value,
+ category: document.getElementById('category').value
+ };
+ products.push(p);
+ localStorage.setItem('products', JSON.stringify(products));
+ render();
+}
+
+function deleteProduct(i){
+ products.splice(i,1);
+ localStorage.setItem('products', JSON.stringify(products));
+ render();
+}
+
+function searchProduct(){
+ let val = document.getElementById('search').value.toLowerCase();
+ let filtered = products.filter(p => p.name.toLowerCase().includes(val));
+ render(filtered);
+}
+
+function order(name,price){
+ let number = "923088585177";
+ let customer = prompt("Enter your name");
+ let address = prompt("Enter your address");
+
+ let orderData = {name, price, customer, address};
+ orders.push(orderData);
+ localStorage.setItem('orders', JSON.stringify(orders));
+ showOrders();
+
+ let msg = `Order: ${name}\nPrice: ${price}\nName: ${customer}\nAddress: ${address}`;
+ window.open(`https://wa.me/${number}?text=${encodeURIComponent(msg)}`);
+}
+
+function showOrders(){
+ let div = document.getElementById('orders');
+ div.innerHTML = '';
+ orders.forEach(o => {
+ div.innerHTML += `<p>${o.name} - ${o.customer}</p>`;
+ });
+}
+
+function showAdmin(){
+ let pass = prompt("Enter Password");
+ if(pass === "Habibamerijan"){
+ document.getElementById('adminPanel').style.display='block';
+ showOrders();
+ }
+}
+
+render();
+</script></body>
+</html>
